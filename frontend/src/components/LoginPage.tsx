@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -26,12 +26,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Demo credentials for role-based access
-  const demoCredentials = [
-    { username: "john.smith", password: "employee123", role: "employee" as const, name: "John Smith", title: "Senior Engineer" },
-    { username: "sarah.davis", password: "hr123", role: "hr" as const, name: "Sarah Davis", title: "HR Director" },
-  ];
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -40,20 +34,28 @@ export function LoginPage({ onLogin }: LoginPageProps) {
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Check credentials and determine role
-    const user = demoCredentials.find(
-      cred => cred.username === username && cred.password === password
-    );
-
-    if (user) {
-      // Backend would normally determine role based on user data
-      onLogin(user.role, {
-        name: user.name,
-        role: user.title,
-        department: user.role === 'employee' ? 'Power Systems Division' : 'Human Resources'
+    // Accept any credentials - for demo purposes
+    if (username.trim() && password.trim()) {
+      // Determine role based on username pattern or default to employee
+      // If username contains 'hr' or 'admin', assign HR role, otherwise employee
+      const isHR = username.toLowerCase().includes('hr') || 
+                   username.toLowerCase().includes('admin') || 
+                   username.toLowerCase().includes('manager');
+      
+      const role = isHR ? 'hr' : 'employee';
+      
+      // Create user object with provided username
+      const userDisplayName = username.split('.').map((part: string) => 
+        part.charAt(0).toUpperCase() + part.slice(1)
+      ).join(' ') || 'User';
+      
+      onLogin(role, {
+        name: userDisplayName,
+        role: isHR ? 'HR Manager' : 'Employee',
+        department: isHR ? 'Human Resources' : 'Power Systems Division'
       });
     } else {
-      setError("Invalid credentials. Please try again.");
+      setError("Please enter both username and password.");
     }
 
     setIsLoading(false);
@@ -153,9 +155,9 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               </Button>
             </form>
 
-            {/* Demo Credentials */}
+            {/* Demo Information */}
             <div className="pt-4 border-t border-gray-100">
-              <p className="text-xs text-gray-500 text-center mb-3">Demo Credentials:</p>
+              <p className="text-xs text-gray-500 text-center mb-3">Demo Mode - Any Credentials Accepted:</p>
               <div className="space-y-2">
                 <div className="flex items-center justify-between p-2 bg-blue-50 rounded-lg text-xs">
                   <div className="flex items-center gap-2">
@@ -163,19 +165,22 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                     <span className="font-medium text-blue-900">Employee Access</span>
                   </div>
                   <div className="text-blue-700">
-                    <div>john.smith / employee123</div>
+                    <div>Any username / Any password</div>
                   </div>
                 </div>
                 <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg text-xs">
                   <div className="flex items-center gap-2">
                     <Users className="h-3 w-3 text-green-600" />
-                    <span className="font-medium text-green-900">HR/Committee Access</span>
+                    <span className="font-medium text-green-900">HR/Admin Access</span>
                   </div>
                   <div className="text-green-700">
-                    <div>sarah.davis / hr123</div>
+                    <div>Username with 'hr', 'admin', or 'manager'</div>
                   </div>
                 </div>
               </div>
+              <p className="text-xs text-gray-400 text-center mt-2">
+                Role determined by username pattern
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -187,7 +192,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             <span>Secure enterprise authentication</span>
           </div>
           <p className="text-xs text-gray-400 mt-2">
-            Role-based access determined by backend authentication system
+            Demo mode: Role-based access with flexible authentication
           </p>
         </div>
 

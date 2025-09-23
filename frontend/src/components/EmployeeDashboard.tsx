@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Progress } from "./ui/progress";
 import { Badge } from "./ui/badge";
@@ -20,6 +21,7 @@ interface Resource {
   type: 'course' | 'mentor' | 'project';
   title: string;
   description: string;
+  role?: "current" | "target";
 }
 
 const mockSkills: Skill[] = [
@@ -29,6 +31,9 @@ const mockSkills: Skill[] = [
   { name: "Risk Management", status: "completed" },
   { name: "Regulatory Compliance", status: "in-progress" },
   { name: "Budget & Financial Planning", status: "missing" },
+  { name: "Project Management", status: "in-progress" },
+  { name: "Cross-functional Collaboration", status: "completed" },
+  { name: "Stakeholder Communication", status: "missing" },
 ];
 
 const mockMilestones: Milestone[] = [
@@ -42,17 +47,24 @@ const mockResources: Resource[] = [
   {
     type: "course",
     title: "Strategic Planning Masterclass",
-    description: "8-week intensive program covering strategic frameworks and execution"
+    description: "8-week intensive program covering strategic frameworks, execution, and real-world case studies."
   },
   {
     type: "mentor",
     title: "Sarah Johnson - VP Operations",
-    description: "Available for bi-weekly mentoring sessions on leadership transition"
+    description: "Available for bi-weekly mentoring sessions on leadership transition, team management, and strategic decision making."
+  },
+  {
+    type: "project",
+    title: "Energy Efficient Smart Grid Implementation Project",
+    description: "Lead initiatives in Power Systems Division to implement smart grid technologies optimizing energy efficiency and operational performance.",
+    role: "current"
   },
   {
     type: "project",
     title: "Smart Grid Implementation Project",
-    description: "Lead a cross-functional team in implementing smart grid technology"
+    description: "Lead a cross-functional team to implement advanced smart grid technologies, optimize energy efficiency, and ensure regulatory compliance across multiple departments.",
+    role: "target"
   }
 ];
 
@@ -63,6 +75,8 @@ const mockNotifications = [
 ];
 
 export function EmployeeDashboard() {
+  const [selectedRole, setSelectedRole] = useState<"current" | "target" | null>(null);
+
   const getSkillStatusColor = (status: string) => {
     switch (status) {
       case 'completed': return 'bg-green-100 text-green-800 border-green-200';
@@ -90,11 +104,84 @@ export function EmployeeDashboard() {
     }
   };
 
+  const roleInfo = {
+    current: {
+      roleName: "Senior Engineer",
+      division: "Power Systems Division",
+      skillNames: ["Advanced Power Systems Analysis", "Risk Management", "Leadership & Team Management"]
+    },
+    target: {
+      roleName: "Engineering Manager",
+      division: "Operations Leadership Track",
+      skillNames: ["Strategic Planning", "Regulatory Compliance", "Budget & Financial Planning", "Project Management", "Cross-functional Collaboration", "Stakeholder Communication"]
+    }
+  };
+
+  if (selectedRole) {
+    const role = roleInfo[selectedRole];
+    const skillsForRole = mockSkills.filter(skill => role.skillNames.includes(skill.name));
+    const projectsForRole = mockResources.filter(r => r.type === "project" && r.role === selectedRole);
+    const coursesForRole = mockResources.filter(r => r.type === "course");
+
+    return (
+      <div className="space-y-8 p-4 md:p-10">
+        <Button onClick={() => setSelectedRole(null)} variant="link" className="text-lg">&larr; Back to Dashboard</Button>
+
+        <Card className="shadow-lg rounded-2xl p-6">
+          <CardHeader>
+            <CardTitle className="text-4xl font-bold">{role.roleName}</CardTitle>
+            <p className="text-xl text-gray-600 mt-1">{role.division}</p>
+          </CardHeader>
+          <CardContent className="space-y-8 mt-6">
+
+            <section>
+              <h3 className="text-2xl font-semibold mb-4">Skills Required</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {skillsForRole.map((skill, i) => (
+                  <Badge
+                    key={i}
+                    className={`text-lg font-medium p-3 ${getSkillStatusColor(skill.status)} rounded-lg shadow-sm`}
+                  >
+                    {skill.name}
+                  </Badge>
+                ))}
+              </div>
+            </section>
+
+            <section>
+              <h3 className="text-2xl font-semibold mb-4">Key Projects</h3>
+              <div className="space-y-3">
+                {projectsForRole.map((p, i) => (
+                  <Card key={i} className="p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                    <h4 className="font-medium">{p.title}</h4>
+                    <p className="text-sm text-gray-600">{p.description}</p>
+                  </Card>
+                ))}
+              </div>
+            </section>
+
+            <section>
+              <h3 className="text-2xl font-semibold mb-4">Learning Resources</h3>
+              <div className="space-y-3">
+                {coursesForRole.map((c, i) => (
+                  <Card key={i} className="p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                    <h4 className="font-medium">{c.title}</h4>
+                    <p className="text-sm text-gray-600">{c.description}</p>
+                  </Card>
+                ))}
+              </div>
+            </section>
+
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      {/* Status Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-200" onClick={() => setSelectedRole("current")}>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm">Current Role</CardTitle>
           </CardHeader>
@@ -103,8 +190,8 @@ export function EmployeeDashboard() {
             <p className="text-muted-foreground text-sm">Power Systems Division</p>
           </CardContent>
         </Card>
-        
-        <Card>
+
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-200" onClick={() => setSelectedRole("target")}>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm">Target Role</CardTitle>
           </CardHeader>
@@ -113,7 +200,7 @@ export function EmployeeDashboard() {
             <p className="text-muted-foreground text-sm">Operations Leadership Track</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm">Readiness Score</CardTitle>
@@ -131,7 +218,6 @@ export function EmployeeDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Skill Gap Analysis */}
         <Card>
           <CardHeader>
             <CardTitle>Skill Gap Analysis</CardTitle>
@@ -141,10 +227,7 @@ export function EmployeeDashboard() {
               {mockSkills.map((skill, index) => (
                 <div key={index} className="flex justify-between items-center">
                   <span className="text-sm">{skill.name}</span>
-                  <Badge 
-                    variant="outline" 
-                    className={getSkillStatusColor(skill.status)}
-                  >
+                  <Badge variant="outline" className={getSkillStatusColor(skill.status)}>
                     {skill.status.replace('-', ' ')}
                   </Badge>
                 </div>
@@ -153,7 +236,6 @@ export function EmployeeDashboard() {
           </CardContent>
         </Card>
 
-        {/* Notifications */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -179,7 +261,6 @@ export function EmployeeDashboard() {
         </Card>
       </div>
 
-      {/* Roadmap Timeline */}
       <Card>
         <CardHeader>
           <CardTitle>Development Roadmap</CardTitle>
@@ -187,27 +268,18 @@ export function EmployeeDashboard() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {mockMilestones.map((milestone, index) => (
-              <div 
-                key={index} 
-                className={`p-4 rounded-lg border-2 ${
-                  milestone.status === 'completed' 
-                    ? 'bg-green-50 border-green-200' 
-                    : milestone.status === 'current'
-                    ? 'bg-blue-50 border-blue-200'
-                    : 'bg-gray-50 border-gray-200'
-                }`}
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  {getMilestoneIcon(milestone.type)}
-                  <span className="text-xs font-medium text-muted-foreground">
-                    {milestone.quarter}
-                  </span>
+              <div key={index} className={`p-4 rounded-lg border-2 ${
+                milestone.status === 'completed'
+                  ? 'bg-green-50 border-green-200'
+                  : milestone.status === 'current'
+                  ? 'bg-blue-50 border-blue-200'
+                  : 'bg-gray-50 border-gray-200'
+              }`}>
+                <div className="flex items-center gap-2 mb-2">{getMilestoneIcon(milestone.type)}
+                  <span className="text-xs font-medium text-muted-foreground">{milestone.quarter}</span>
                 </div>
                 <h4 className="text-sm font-medium mb-1">{milestone.title}</h4>
-                <Badge 
-                  size="sm" 
-                  variant={milestone.status === 'completed' ? 'default' : 'secondary'}
-                >
+                <Badge size="sm" variant={milestone.status === 'completed' ? 'default' : 'secondary'}>
                   {milestone.status}
                 </Badge>
               </div>
@@ -216,25 +288,20 @@ export function EmployeeDashboard() {
         </CardContent>
       </Card>
 
-      {/* Learning Hub */}
       <Card>
         <CardHeader>
           <CardTitle>Resources & Learning Hub</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {mockResources.map((resource, index) => (
+            {mockResources.filter(r => r.type !== "project").map((resource, index) => (
               <div key={index} className="p-4 border rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
                   {getResourceIcon(resource.type)}
                   <h4 className="font-medium">{resource.title}</h4>
                 </div>
-                <p className="text-sm text-muted-foreground mb-3">
-                  {resource.description}
-                </p>
-                <Button size="sm" variant="outline" className="w-full">
-                  {resource.type === 'mentor' ? 'Contact' : 'Access'}
-                </Button>
+                <p className="text-sm text-muted-foreground mb-3">{resource.description}</p>
+                <Button size="sm" variant="outline" className="w-full">{resource.type === 'mentor' ? 'Contact' : 'Access'}</Button>
               </div>
             ))}
           </div>

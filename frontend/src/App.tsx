@@ -230,6 +230,7 @@ export default function App() {
       <Route 
         path="/employee-dashboard" 
         element={
+          
           // <ProtectedRoute requiredRole="user">
             <DashboardLayout userRole="user">
               <EmployeeDashboard />

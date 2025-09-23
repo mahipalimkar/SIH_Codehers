@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { Progress } from "./ui/progress";
 import {
   Select,
   SelectContent,
@@ -10,90 +8,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { Input } from "./ui/input";
-import {
-  Users,
-  TrendingUp,
-  AlertTriangle,
-  Target,
-  Plus,
-  Settings,
-  Search,
-  Filter,
-} from "lucide-react";
+import { Users, Target, AlertTriangle, TrendingUp } from "lucide-react";
 
-interface Employee {
-  id: string;
-  name: string;
-  currentRole: string;
-  targetRole: string;
-  readiness: number;
-  performance: "high" | "medium" | "low";
-  potential: "high" | "medium" | "low";
-}
-
-const mockEmployees: Employee[] = [
-  {
-    id: "EMP001",
-    name: "John Smith",
-    currentRole: "Senior Engineer",
-    targetRole: "Engineering Manager",
-    readiness: 85,
-    performance: "high",
-    potential: "high",
-  },
-  {
-    id: "EMP002",
-    name: "Sarah Davis",
-    currentRole: "Project Manager",
-    targetRole: "Senior Manager",
-    readiness: 72,
-    performance: "high",
-    potential: "medium",
-  },
-  {
-    id: "EMP003",
-    name: "Mike Johnson",
-    currentRole: "Analyst",
-    targetRole: "Senior Analyst",
-    readiness: 68,
-    performance: "medium",
-    potential: "high",
-  },
-  {
-    id: "EMP004",
-    name: "Lisa Wang",
-    currentRole: "Engineer",
-    targetRole: "Senior Engineer",
-    readiness: 91,
-    performance: "high",
-    potential: "high",
-  },
-  {
-    id: "EMP005",
-    name: "David Brown",
-    currentRole: "Specialist",
-    targetRole: "Lead Specialist",
-    readiness: 45,
-    performance: "medium",
-    potential: "medium",
-  },
-];
-
-const criticalRoles = [
-  { role: "Engineering Manager", readiness: "68%", urgency: "high" },
-  { role: "Senior Operations Manager", readiness: "42%", urgency: "critical" },
-  { role: "Technical Director", readiness: "75%", urgency: "medium" },
-];
-
-const topMissingSkills = [
-  { skill: "Strategic Planning", count: 15 },
-  { skill: "Advanced Leadership", count: 12 },
-  { skill: "Budget Management", count: 10 },
-  { skill: "Risk Assessment", count: 8 },
-];
-
-// Job-specific 9-box matrices
 const jobMatrices: Record<string, number[][]> = {
   "Engineering Manager": [
     [1, 2, 1],
@@ -110,6 +26,45 @@ const jobMatrices: Record<string, number[][]> = {
     [1, 2, 0],
     [2, 1, 1],
   ],
+};
+
+const jobAnalytics: Record<
+  string,
+  {
+    criticalRoles: { role: string; readiness: string; urgency: string }[];
+    topMissingSkills: { skill: string; count: number }[];
+  }
+> = {
+  "Engineering Manager": {
+    criticalRoles: [
+      { role: "Engineering Manager", readiness: "68%", urgency: "high" },
+      { role: "Technical Director", readiness: "75%", urgency: "medium" },
+    ],
+    topMissingSkills: [
+      { skill: "Advanced Leadership", count: 12 },
+      { skill: "Risk Assessment", count: 8 },
+    ],
+  },
+  "Project Manager": {
+    criticalRoles: [
+      { role: "Senior Manager", readiness: "42%", urgency: "critical" },
+      { role: "Operations Lead", readiness: "60%", urgency: "high" },
+    ],
+    topMissingSkills: [
+      { skill: "Strategic Planning", count: 15 },
+      { skill: "Budget Management", count: 10 },
+    ],
+  },
+  Designer: {
+    criticalRoles: [
+      { role: "Lead Designer", readiness: "70%", urgency: "high" },
+      { role: "Creative Director", readiness: "50%", urgency: "medium" },
+    ],
+    topMissingSkills: [
+      { skill: "UX/UI Design", count: 14 },
+      { skill: "Prototyping", count: 9 },
+    ],
+  },
 };
 
 export function HRDashboard() {
@@ -131,6 +86,21 @@ export function HRDashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Job Role Dropdown - COMMON */}
+      <div className="mb-4 w-64">
+        <Select defaultValue={selectedJob} onValueChange={setSelectedJob}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select job role" />
+          </SelectTrigger>
+          <SelectContent>
+            {Object.keys(jobMatrices).map((job) => (
+              <SelectItem key={job} value={job}>
+                {job}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card>
@@ -141,7 +111,7 @@ export function HRDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-medium">10</p>
+            <p className="text-2xl font-medium">1,247</p>
             <p className="text-xs text-muted-foreground">+12 this quarter</p>
           </CardContent>
         </Card>
@@ -154,7 +124,7 @@ export function HRDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-medium text-green-600">2</p>
+            <p className="text-2xl font-medium text-green-600">156</p>
             <p className="text-xs text-muted-foreground">12.5% of workforce</p>
           </CardContent>
         </Card>
@@ -167,7 +137,7 @@ export function HRDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-medium text-red-600">3</p>
+            <p className="text-2xl font-medium text-red-600">23</p>
             <p className="text-xs text-muted-foreground">
               Requires immediate action
             </p>
@@ -201,8 +171,8 @@ export function HRDashboard() {
               {/* Job Role Dropdown */}
               <div className="mb-4 w-64">
                 <Select
-                  value={selectedJob}
-                  onValueChange={(value) => setSelectedJob(value)}
+                  defaultValue={selectedJob}
+                  onValueChange={setSelectedJob}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select job role" />
@@ -224,7 +194,7 @@ export function HRDashboard() {
               </div>
 
               <div className="grid grid-cols-3 gap-1 aspect-square max-w-sm">
-                {boxCounts.reverse().map((row, rowIndex) =>
+                {[...boxCounts].reverse().map((row, rowIndex) =>
                   row.map((count, colIndex) => (
                     <div
                       key={`${rowIndex}-${colIndex}`}
@@ -257,68 +227,99 @@ export function HRDashboard() {
           </CardContent>
         </Card>
 
-        {/* Analytics Panel */}
+        {/* Analytics Dashboard */}
         <Card>
           <CardHeader>
             <CardTitle>Analytics Dashboard</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
+              {/* Critical Role Readiness */}
               <div>
                 <h4 className="font-medium mb-2">Critical Role Readiness</h4>
                 <div className="space-y-2">
-                  {criticalRoles.map((role, index) => (
-                    <div
-                      key={index}
-                      className="flex justify-between items-center"
+                  {/* Job Role Dropdown */}
+                  <div className="mb-4 w-64">
+                    <Select
+                      defaultValue={selectedJob}
+                      onValueChange={setSelectedJob}
                     >
-                      <span className="text-sm">{role.role}</span>
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`text-sm font-medium ${getReadinessColor(
-                            parseInt(role.readiness)
-                          )}`}
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select job role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.keys(jobMatrices).map((job) => (
+                          <SelectItem key={job} value={job}>
+                            {job}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {jobAnalytics[selectedJob].criticalRoles.map(
+                    (role, index) => {
+                      const readinessValue = parseInt(
+                        role.readiness.replace("%", "")
+                      );
+                      return (
+                        <div
+                          key={index}
+                          className="flex justify-between items-center"
                         >
-                          {role.readiness}
-                        </span>
-                        <Badge
-                          variant={
-                            role.urgency === "critical"
-                              ? "destructive"
-                              : role.urgency === "high"
-                              ? "secondary"
-                              : "outline"
-                          }
-                        >
-                          {role.urgency}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
+                          <span className="text-sm">{role.role}</span>
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`text-sm font-medium ${
+                                readinessValue >= 80
+                                  ? "text-green-600"
+                                  : readinessValue >= 60
+                                  ? "text-yellow-600"
+                                  : "text-red-600"
+                              }`}
+                            >
+                              {role.readiness}
+                            </span>
+                            <Badge
+                              variant={
+                                role.urgency === "critical"
+                                  ? "destructive"
+                                  : role.urgency === "high"
+                                  ? "secondary"
+                                  : "outline"
+                              }
+                            >
+                              {role.urgency}
+                            </Badge>
+                          </div>
+                        </div>
+                      );
+                    }
+                  )}
                 </div>
               </div>
 
+              {/* Top Missing Skills */}
               <div>
                 <h4 className="font-medium mb-2">Top Missing Skills</h4>
                 <div className="space-y-2">
-                  {topMissingSkills.map((skill, index) => (
-                    <div
-                      key={index}
-                      className="flex justify-between items-center"
-                    >
-                      <span className="text-sm">{skill.skill}</span>
-                      <Badge variant="outline">{skill.count} employees</Badge>
-                    </div>
-                  ))}
+                  {jobAnalytics[selectedJob].topMissingSkills.map(
+                    (skill, index) => (
+                      <div
+                        key={index}
+                        className="flex justify-between items-center"
+                      >
+                        <span className="text-sm">{skill.skill}</span>
+                        <Badge variant="outline">{skill.count} employees</Badge>
+                      </div>
+                    )
+                  )}
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
-
-      {/* Employee List & Management */}
-      {/* ...Keep the rest of your employee list and quick actions as-is... */}
     </div>
   );
 }

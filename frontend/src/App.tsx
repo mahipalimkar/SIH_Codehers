@@ -11,6 +11,7 @@ import {
   Bell,
   LogOut 
 } from "lucide-react";
+import { NotificationsPage } from "./components/NotificationsPage";
 
 type UserRole = 'user' | 'admin';
 
@@ -52,8 +53,8 @@ function ProtectedRoute({ children, requiredRole }: { children: React.ReactNode,
 function DashboardLayout({ userRole, children }: { userRole: UserRole, children: React.ReactNode }) {
   const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState({
-    name: "John Smith",
-    role: userRole === 'admin' ? "Administrator" : "Senior Engineer",
+    name: "Ravi Sharma",
+    role: userRole === 'admin' ? "Administrator" : "Manager - Operations",
     department: "Power Systems Division"
   });
 
@@ -99,7 +100,10 @@ function DashboardLayout({ userRole, children }: { userRole: UserRole, children:
           <div className="flex items-center gap-4">
             {/* User Profile */}
             <div className="flex items-center gap-3">
-              <Bell className="h-5 w-5 text-gray-500 cursor-pointer hover:text-gray-700" />
+              <Bell 
+  className="h-5 w-5 text-gray-500 cursor-pointer hover:text-gray-700" 
+  onClick={() => navigate('/notifications')}
+/>
               <Settings className="h-5 w-5 text-gray-500 cursor-pointer hover:text-gray-700" />
               <div className="flex items-center gap-2 pl-3 border-l border-gray-300">
                 <div className="text-right">
@@ -157,29 +161,7 @@ function DashboardLayout({ userRole, children }: { userRole: UserRole, children:
           {children}
         </div>
 
-        {/* Quick Stats Footer */}
-        <div className="mt-8">
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="text-center">
-                <p className="text-2xl font-semibold text-blue-600">1,247</p>
-                <p className="text-sm text-gray-600">Total Employees</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-semibold text-green-600">156</p>
-                <p className="text-sm text-gray-600">Ready for Promotion</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-semibold text-orange-600">89</p>
-                <p className="text-sm text-gray-600">In Development</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-semibold text-purple-600">34</p>
-                <p className="text-sm text-gray-600">Critical Positions</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        
       </main>
 
       {/* Footer */}
@@ -238,7 +220,18 @@ export default function App() {
           // </ProtectedRoute>
         } 
       />
-      
+       {/* Notifications Page */}
+      <Route 
+        path="/notifications" 
+        element={
+          // <ProtectedRoute requiredRole="user">
+            <DashboardLayout userRole="user">
+              <NotificationsPage />
+            </DashboardLayout>
+          // </ProtectedRoute>
+        } 
+      />
+
       {/* Protected Admin Dashboard */}
       <Route 
         path="/admin-dashboard" 

@@ -286,8 +286,6 @@ export function HRDashboard() {
         darkMode ? "bg-[#18181b] text-gray-100" : "bg-gray-50 text-gray-900"
       }`}
     >
-      
-
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className={darkMode ? "bg-[#232326] border-gray-700" : ""}>
@@ -339,7 +337,9 @@ export function HRDashboard() {
           </CardContent>
         </Card>
       </div>
-      <h2 className="text-2xl font-semibold text-gray-900 mb-2">Choose a job role -</h2>
+      <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+        Choose a job role -
+      </h2>
 
       {/* Job Role & Dark Mode Toggle */}
       <div className="mb-4 w-full flex items-center justify-between">
@@ -386,10 +386,10 @@ export function HRDashboard() {
       </div>
 
       {/* 9-Box Matrix & Analytics */}
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* 9-Box */}
-        
+
         <Card className={darkMode ? "bg-[#232326] border-gray-700" : ""}>
           <CardHeader>
             <CardTitle>9-Box Matrix</CardTitle>
@@ -482,7 +482,9 @@ export function HRDashboard() {
                 })}
               </div>
 
-              <h4 className="font-medium mb-2">Top Missing Skills (for current job)</h4>
+              <h4 className="font-medium mb-2">
+                Top Missing Skills (for current job)
+              </h4>
               <div className="space-y-2">
                 {jobAnalytics[selectedJob].topMissingSkills.map(
                   (skill, index) => (
@@ -660,23 +662,25 @@ export function HRDashboard() {
               <CardTitle className="text-sm mb-2">Role Assignment</CardTitle>
               <div className="space-y-2">
                 <Select>
-  <SelectTrigger>
-    <SelectValue placeholder="Select employee" />
-  </SelectTrigger>
-  <SelectContent>
-    {unassignedEmployees.map((emp) => (
-      <SelectItem key={emp.id} value={emp.id}>
-        {emp.name} ({emp.id})
-      </SelectItem>
-    ))}
-  </SelectContent>
-</Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select employee" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {unassignedEmployees.map((emp) => (
+                      <SelectItem key={emp.id} value={emp.id}>
+                        {emp.name} ({emp.id})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <Select>
                   <SelectTrigger>
                     <SelectValue placeholder="Suggest target role" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="manager">Director (Operations)</SelectItem>
+                    <SelectItem value="manager">
+                      Director (Operations)
+                    </SelectItem>
                     <SelectItem value="senior">Senior Engineer</SelectItem>
                     <SelectItem value="lead">Lead Specialist</SelectItem>
                   </SelectContent>

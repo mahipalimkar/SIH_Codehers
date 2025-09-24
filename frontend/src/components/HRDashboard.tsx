@@ -41,58 +41,70 @@ interface Employee {
 const mockEmployees: Employee[] = [
   {
     id: "EMP001",
-    name: "John Smith",
-    currentRole: "Senior Engineer",
-    targetRole: "Engineering Manager",
+    name: "Anil Kumar",
+    currentRole: "Deputy GM – Transmission",
+    targetRole: "ED (Engineering)",
     readiness: 85,
     performance: "high",
     potential: "high",
   },
   {
     id: "EMP002",
-    name: "Sarah Davis",
-    currentRole: "Project Manager",
-    targetRole: "Senior Manager",
+    name: "Priya Singh",
+    currentRole: "Senior Manager – Finance",
+    targetRole: "Director (Finance)",
     readiness: 72,
     performance: "high",
     potential: "medium",
   },
   {
     id: "EMP003",
-    name: "Mike Johnson",
-    currentRole: "Analyst",
-    targetRole: "Senior Analyst",
-    readiness: 68,
+    name: "Ravi Sharma",
+    currentRole: "Manager – Operations",
+    targetRole: "Director (Operation)",
+    readiness: 72,
     performance: "medium",
     potential: "high",
   },
   {
     id: "EMP004",
-    name: "Lisa Wang",
+    name: "Sunita Verma",
     currentRole: "Engineer",
-    targetRole: "Senior Engineer",
+    targetRole: "ED (Engineering)",
     readiness: 91,
     performance: "high",
     potential: "high",
   },
   {
     id: "EMP005",
-    name: "David Brown",
-    currentRole: "Specialist",
-    targetRole: "Lead Specialist",
+    name: "Rajesh Gupta",
+    currentRole: "Manager – Corporate Communications",
+    targetRole: "Executive Director – Corporate Communications",
     readiness: 45,
     performance: "medium",
     potential: "medium",
   },
 ];
-
+// Add this new array after mockEmployees (around line 95)
+const unassignedEmployees = [
+  { id: "EMP006", name: "Vikram Patel" },
+  { id: "EMP007", name: "Meera Joshi" },
+  { id: "EMP008", name: "Arjun Reddy" },
+  { id: "EMP009", name: "Kavita Nair" },
+  { id: "EMP010", name: "Rohit Malhotra" },
+  { id: "EMP011", name: "Deepika Sharma" },
+  { id: "EMP012", name: "Sanjay Yadav" },
+  { id: "EMP013", name: "Pooja Agarwal" },
+  { id: "EMP014", name: "Karan Singh" },
+  { id: "EMP015", name: "Neha Gupta" },
+];
 const jobMatrices: Record<string, number[][]> = {
-  "Engineering Manager": [
+  "Director (Operations)": [
     [1, 2, 1],
     [0, 3, 1],
     [1, 0, 2],
   ],
-  "Project Manager": [
+  "Director (Finance)": [
     [2, 1, 1],
     [1, 2, 1],
     [0, 1, 2],
@@ -111,16 +123,16 @@ const jobAnalytics: Record<
     topMissingSkills: { skill: string; count: number }[];
   }
 > = {
-  "Engineering Manager": {
+  "Director (Operations)": {
     criticalRoles: [
-      { role: "Engineering Manager", readiness: "68%", urgency: "high" },
-      { role: "Technical Director", readiness: "75%", urgency: "medium" },
+      { role: "Director (Operations)", readiness: "68%", urgency: "medium" },
+      { role: "Director (Finance)", readiness: "75%", urgency: "high" },
       {
-        role: "Software development manager",
+        role: "Executive Director (Engineering)",
         readiness: "67%",
-        urgency: "high",
+        urgency: "medium",
       },
-      { role: "Principle engineer", readiness: "80%", urgency: "low" },
+      { role: "Design Head", readiness: "40%", urgency: "low" },
     ],
     topMissingSkills: [
       { skill: "Advanced Leadership", count: 12 },
@@ -129,10 +141,16 @@ const jobAnalytics: Record<
       { skill: "System Architecture and Design", count: 5 },
     ],
   },
-  "Project Manager": {
+  "Director (Finance)": {
     criticalRoles: [
-      { role: "Senior Manager", readiness: "42%", urgency: "critical" },
-      { role: "Operations Lead", readiness: "60%", urgency: "high" },
+      { role: "Director (Operations)", readiness: "68%", urgency: "medium" },
+      { role: "Director (Finance)", readiness: "75%", urgency: "high" },
+      {
+        role: "Executive Director (Engineering)",
+        readiness: "67%",
+        urgency: "medium",
+      },
+      { role: "Design Head", readiness: "40%", urgency: "low" },
     ],
     topMissingSkills: [
       { skill: "Strategic Planning", count: 15 },
@@ -141,8 +159,14 @@ const jobAnalytics: Record<
   },
   Designer: {
     criticalRoles: [
-      { role: "Lead Designer", readiness: "70%", urgency: "high" },
-      { role: "Creative Director", readiness: "50%", urgency: "medium" },
+      { role: "Director (Operations)", readiness: "68%", urgency: "medium" },
+      { role: "Director (Finance)", readiness: "75%", urgency: "high" },
+      {
+        role: "Executive Director (Engineering)",
+        readiness: "67%",
+        urgency: "medium",
+      },
+      { role: "Design Head", readiness: "40%", urgency: "low" },
     ],
     topMissingSkills: [
       { skill: "UX/UI Design", count: 14 },
@@ -171,7 +195,7 @@ const employeeRoadmaps: Record<string, string[]> = {
     "Complete Advanced Leadership Training",
     "Lead Grid Modernization Project",
     "Mentor junior engineers",
-    "Prepare for Engineering Manager assessment",
+    "Prepare for Director (Operations) assessment",
   ],
   EMP002: [
     "Attend Strategic Planning Workshop",
@@ -233,7 +257,7 @@ const mockVerifications: {
 ];
 
 export function HRDashboard() {
-  const [selectedJob, setSelectedJob] = useState("Engineering Manager");
+  const [selectedJob, setSelectedJob] = useState("Director (Operations)");
   const [expandedEmployee, setExpandedEmployee] = useState<string | null>(null);
   const [darkMode, setDarkMode] = useState(false);
   const [selectedVerificationEmp, setSelectedVerificationEmp] =
@@ -262,49 +286,7 @@ export function HRDashboard() {
         darkMode ? "bg-[#18181b] text-gray-100" : "bg-gray-50 text-gray-900"
       }`}
     >
-      {/* Job Role & Dark Mode Toggle */}
-      <div className="mb-4 w-full flex items-center justify-between">
-        <div className="w-64">
-          <Select defaultValue={selectedJob} onValueChange={setSelectedJob}>
-            <SelectTrigger
-              className={
-                darkMode ? "bg-[#27272a] text-gray-100 border-gray-700" : ""
-              }
-            >
-              <SelectValue placeholder="Select job role" />
-            </SelectTrigger>
-            <SelectContent
-              className={
-                darkMode ? "bg-[#27272a] text-gray-100 border-gray-700" : ""
-              }
-            >
-              {Object.keys(jobMatrices).map((job) => (
-                <SelectItem key={job} value={job}>
-                  {job}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleToggleDarkMode}
-          className={
-            darkMode ? "bg-[#27272a] text-gray-100 border-gray-700" : "ml-4"
-          }
-        >
-          {darkMode ? (
-            <>
-              <Sun className="h-4 w-4 mr-2" /> Light Mode
-            </>
-          ) : (
-            <>
-              <Moon className="h-4 w-4 mr-2" /> Dark Mode
-            </>
-          )}
-        </Button>
-      </div>
+      
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -357,10 +339,57 @@ export function HRDashboard() {
           </CardContent>
         </Card>
       </div>
+      <h2 className="text-2xl font-semibold text-gray-900 mb-2">Choose a job role -</h2>
+
+      {/* Job Role & Dark Mode Toggle */}
+      <div className="mb-4 w-full flex items-center justify-between">
+        <div className="w-64">
+          <Select defaultValue={selectedJob} onValueChange={setSelectedJob}>
+            <SelectTrigger
+              className={
+                darkMode ? "bg-[#27272a] text-gray-100 border-gray-700" : ""
+              }
+            >
+              <SelectValue placeholder="Select job role" />
+            </SelectTrigger>
+            <SelectContent
+              className={
+                darkMode ? "bg-[#27272a] text-gray-100 border-gray-700" : ""
+              }
+            >
+              {Object.keys(jobMatrices).map((job) => (
+                <SelectItem key={job} value={job}>
+                  {job}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleToggleDarkMode}
+          className={
+            darkMode ? "bg-[#27272a] text-gray-100 border-gray-700" : "ml-4"
+          }
+        >
+          {darkMode ? (
+            <>
+              <Sun className="h-4 w-4 mr-2" /> Light Mode
+            </>
+          ) : (
+            <>
+              <Moon className="h-4 w-4 mr-2" /> Dark Mode
+            </>
+          )}
+        </Button>
+      </div>
 
       {/* 9-Box Matrix & Analytics */}
+      
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* 9-Box */}
+        
         <Card className={darkMode ? "bg-[#232326] border-gray-700" : ""}>
           <CardHeader>
             <CardTitle>9-Box Matrix</CardTitle>
@@ -453,7 +482,7 @@ export function HRDashboard() {
                 })}
               </div>
 
-              <h4 className="font-medium mb-2">Top Missing Skills</h4>
+              <h4 className="font-medium mb-2">Top Missing Skills (for current job)</h4>
               <div className="space-y-2">
                 {jobAnalytics[selectedJob].topMissingSkills.map(
                   (skill, index) => (
@@ -631,23 +660,23 @@ export function HRDashboard() {
               <CardTitle className="text-sm mb-2">Role Assignment</CardTitle>
               <div className="space-y-2">
                 <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select employee" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {mockEmployees.map((emp) => (
-                      <SelectItem key={emp.id} value={emp.id}>
-                        {emp.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+  <SelectTrigger>
+    <SelectValue placeholder="Select employee" />
+  </SelectTrigger>
+  <SelectContent>
+    {unassignedEmployees.map((emp) => (
+      <SelectItem key={emp.id} value={emp.id}>
+        {emp.name} ({emp.id})
+      </SelectItem>
+    ))}
+  </SelectContent>
+</Select>
                 <Select>
                   <SelectTrigger>
                     <SelectValue placeholder="Suggest target role" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="manager">Engineering Manager</SelectItem>
+                    <SelectItem value="manager">Director (Operations)</SelectItem>
                     <SelectItem value="senior">Senior Engineer</SelectItem>
                     <SelectItem value="lead">Lead Specialist</SelectItem>
                   </SelectContent>

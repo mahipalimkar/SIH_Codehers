@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Bell,
   Users,
@@ -11,6 +11,8 @@ import {
   Search,
   Moon,
   Sun,
+  CheckCircle,
+  Clock,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
@@ -35,6 +37,7 @@ interface Employee {
   potential: "high" | "medium" | "low";
 }
 
+// Mock data
 const mockEmployees: Employee[] = [
   {
     id: "EMP001",
@@ -112,10 +115,18 @@ const jobAnalytics: Record<
     criticalRoles: [
       { role: "Engineering Manager", readiness: "68%", urgency: "high" },
       { role: "Technical Director", readiness: "75%", urgency: "medium" },
+      {
+        role: "Software development manager",
+        readiness: "67%",
+        urgency: "high",
+      },
+      { role: "Principle engineer", readiness: "80%", urgency: "low" },
     ],
     topMissingSkills: [
       { skill: "Advanced Leadership", count: 12 },
       { skill: "Risk Assessment", count: 8 },
+      { skill: "Problem Solving", count: 3 },
+      { skill: "System Architecture and Design", count: 5 },
     ],
   },
   "Project Manager": {
@@ -140,7 +151,7 @@ const jobAnalytics: Record<
   },
 };
 
-// Mock projects and skills
+// Mock employee projects, skills, roadmaps
 const employeeProjects: Record<string, string[]> = {
   EMP001: ["Grid Modernization", "Safety Audit"],
   EMP002: ["Renewable Integration", "Budget Review"],
@@ -148,7 +159,6 @@ const employeeProjects: Record<string, string[]> = {
   EMP004: ["Infrastructure Upgrade"],
   EMP005: ["Specialist Training", "Compliance"],
 };
-
 const employeeSkills: Record<string, string[]> = {
   EMP001: ["Leadership", "Technical Expertise", "Risk Management"],
   EMP002: ["Project Planning", "Communication", "Budgeting"],
@@ -156,20 +166,6 @@ const employeeSkills: Record<string, string[]> = {
   EMP004: ["Engineering", "Teamwork"],
   EMP005: ["Specialization", "Mentoring"],
 };
-
-const boxLabels = [
-  ["Inconsistent Performer", "Core Player", "High Performer"],
-  ["Question Mark", "Solid Performer", "Key Player"],
-  ["Poor Performer", "Underutilized", "Star Player"],
-];
-
-// Small 3x3 random matrix generator
-const generateRandomMatrix = () =>
-  Array.from({ length: 3 }, () =>
-    Array.from({ length: 3 }, () => Math.floor(Math.random() * 3))
-  );
-
-// Add mock roadmap data for demonstration
 const employeeRoadmaps: Record<string, string[]> = {
   EMP001: [
     "Complete Advanced Leadership Training",
@@ -203,65 +199,45 @@ const employeeRoadmaps: Record<string, string[]> = {
   ],
 };
 
+// Mock verifications (uploaded by employees)
+const mockVerifications: {
+  id: number;
+  employeeId: string;
+  file: string;
+  status: "pending" | "approved";
+}[] = [
+  {
+    id: 1,
+    employeeId: "EMP001",
+    file: "Leadership_Certificate.pdf",
+    status: "approved",
+  },
+  {
+    id: 2,
+    employeeId: "EMP001",
+    file: "Project_Completion_Grid.pdf",
+    status: "pending",
+  },
+  {
+    id: 3,
+    employeeId: "EMP002",
+    file: "Budget_Review_Certificate.pdf",
+    status: "approved",
+  },
+  {
+    id: 4,
+    employeeId: "EMP003",
+    file: "Analytics_Bootcamp.pdf",
+    status: "pending",
+  },
+];
+
 export function HRDashboard() {
   const [selectedJob, setSelectedJob] = useState("Engineering Manager");
   const [expandedEmployee, setExpandedEmployee] = useState<string | null>(null);
   const [darkMode, setDarkMode] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
-
-  // Example notifications
-  const notifications = [
-    {
-      id: 1,
-      title: "New employee added",
-      description: "Priya Singh joined as Junior Engineer.",
-      time: "2 min ago",
-    },
-    {
-      id: 2,
-      title: "Role updated",
-      description: "Sarah Davis promoted to Senior Manager.",
-      time: "10 min ago",
-    },
-    {
-      id: 3,
-      title: "Training scheduled",
-      description: "Leadership training for John Smith on Oct 2.",
-      time: "1 hour ago",
-    },
-  ];
-
-  // For closing popup when clicking outside
-  const notifRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        notifRef.current &&
-        !notifRef.current.contains(event.target as Node)
-      ) {
-        setShowNotifications(false);
-      }
-    }
-    if (showNotifications) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [showNotifications]);
-
-  // Toggle dark mode by adding/removing a class on the document body
-  const handleToggleDarkMode = () => {
-    setDarkMode((prev) => {
-      const next = !prev;
-      if (next) {
-        document.body.classList.add("dark");
-      } else {
-        document.body.classList.remove("dark");
-      }
-      return next;
-    });
-  };
+  const [selectedVerificationEmp, setSelectedVerificationEmp] =
+    useState<string>("");
 
   const boxCounts = jobMatrices[selectedJob];
 
@@ -271,13 +247,22 @@ export function HRDashboard() {
     return "text-red-600";
   };
 
+  const handleToggleDarkMode = () => {
+    setDarkMode((prev) => {
+      const next = !prev;
+      if (next) document.body.classList.add("dark");
+      else document.body.classList.remove("dark");
+      return next;
+    });
+  };
+
   return (
     <div
       className={`space-y-6 min-h-screen transition-colors ${
         darkMode ? "bg-[#18181b] text-gray-100" : "bg-gray-50 text-gray-900"
       }`}
     >
-      {/* Job Role Dropdown, Notifications, & Dark Mode Toggle */}
+      {/* Job Role & Dark Mode Toggle */}
       <div className="mb-4 w-full flex items-center justify-between">
         <div className="w-64">
           <Select defaultValue={selectedJob} onValueChange={setSelectedJob}>
@@ -301,28 +286,24 @@ export function HRDashboard() {
             </SelectContent>
           </Select>
         </div>
-        {/* Removed Bell Icon */}
-        <div className="flex items-center gap-2 relative">
-          {/* Only Dark Mode Toggle Button remains */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleToggleDarkMode}
-            className={
-              darkMode ? "bg-[#27272a] text-gray-100 border-gray-700" : "ml-4"
-            }
-          >
-            {darkMode ? (
-              <>
-                <Sun className="h-4 w-4 mr-2" /> Light Mode
-              </>
-            ) : (
-              <>
-                <Moon className="h-4 w-4 mr-2" /> Dark Mode
-              </>
-            )}
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleToggleDarkMode}
+          className={
+            darkMode ? "bg-[#27272a] text-gray-100 border-gray-700" : "ml-4"
+          }
+        >
+          {darkMode ? (
+            <>
+              <Sun className="h-4 w-4 mr-2" /> Light Mode
+            </>
+          ) : (
+            <>
+              <Moon className="h-4 w-4 mr-2" /> Dark Mode
+            </>
+          )}
+        </Button>
       </div>
 
       {/* Key Metrics */}
@@ -379,6 +360,7 @@ export function HRDashboard() {
 
       {/* 9-Box Matrix & Analytics */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* 9-Box */}
         <Card className={darkMode ? "bg-[#232326] border-gray-700" : ""}>
           <CardHeader>
             <CardTitle>9-Box Matrix</CardTitle>
@@ -390,18 +372,30 @@ export function HRDashboard() {
                   <div
                     key={`${rowIndex}-${colIndex}`}
                     className={`border-2 rounded-lg p-2 flex flex-col justify-between text-center
-                    ${
-                      rowIndex === 0 && colIndex === 2
-                        ? "bg-green-50 border-green-200"
-                        : rowIndex === 0 && colIndex === 1
-                        ? "bg-blue-50 border-blue-200"
-                        : rowIndex === 2 && colIndex === 0
-                        ? "bg-red-50 border-red-200"
-                        : "bg-gray-50 border-gray-200"
-                    }`}
+                  ${
+                    rowIndex === 0 && colIndex === 2
+                      ? "bg-green-50 border-green-200"
+                      : rowIndex === 0 && colIndex === 1
+                      ? "bg-blue-50 border-blue-200"
+                      : rowIndex === 2 && colIndex === 0
+                      ? "bg-red-50 border-red-200"
+                      : "bg-gray-50 border-gray-200"
+                  }`}
                   >
                     <div className="text-xs text-muted-foreground mb-1">
-                      {boxLabels[2 - rowIndex][colIndex]}
+                      {
+                        [
+                          "Poor Performer",
+                          "Underutilized",
+                          "Star Player",
+                          "Question Mark",
+                          "Solid Performer",
+                          "Key Player",
+                          "Inconsistent Performer",
+                          "Core Player",
+                          "High Performer",
+                        ][rowIndex * 3 + colIndex]
+                      }
                     </div>
                     <div className="text-lg font-medium">{count}</div>
                   </div>
@@ -411,6 +405,7 @@ export function HRDashboard() {
           </CardContent>
         </Card>
 
+        {/* Analytics */}
         <Card className={darkMode ? "bg-[#232326] border-gray-700" : ""}>
           <CardHeader>
             <CardTitle>Analytics Dashboard</CardTitle>
@@ -477,8 +472,9 @@ export function HRDashboard() {
         </Card>
       </div>
 
-      {/* Employee Tracking */}
+      {/* Employee Tracking + Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Employee Development Tracking */}
         <Card
           className={`lg:col-span-2 ${
             darkMode ? "bg-[#232326] border-gray-700" : ""
@@ -571,16 +567,12 @@ export function HRDashboard() {
                       }`}
                     >
                       <h4 className="font-medium text-sm">Employee Insights</h4>
-
-                      {/* Progress */}
                       <div>
                         <p className="text-xs text-muted-foreground mb-1">
                           Progress towards target role
                         </p>
                         <Progress value={emp.readiness} className="h-2" />
                       </div>
-
-                      {/* Projects */}
                       <div>
                         <p className="text-xs text-muted-foreground mb-1">
                           Current Projects
@@ -591,8 +583,6 @@ export function HRDashboard() {
                           ))}
                         </ul>
                       </div>
-
-                      {/* Skills */}
                       <div>
                         <p className="text-xs text-muted-foreground mb-1">
                           Skills
@@ -609,8 +599,6 @@ export function HRDashboard() {
                           ))}
                         </div>
                       </div>
-
-                      {/* Roadmap */}
                       <div>
                         <p className="text-xs text-muted-foreground mb-1">
                           Roadmap
@@ -684,38 +672,94 @@ export function HRDashboard() {
                   size="sm"
                   className="w-full justify-start"
                 >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Training Program
+                  <Plus className="h-4 w-4 mr-2" /> Add Training Program
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   className="w-full justify-start"
                 >
-                  <Users className="h-4 w-4 mr-2" />
-                  Manage Mentor
+                  <Users className="h-4 w-4 mr-2" /> Manage Mentor
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   className="w-full justify-start"
                 >
-                  <Target className="h-4 w-4 mr-2" />
-                  Create Project
+                  <Target className="h-4 w-4 mr-2" /> Create Project
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   className="w-full justify-start"
                 >
-                  <Settings className="h-4 w-4 mr-2" />
-                  System Settings
+                  <Settings className="h-4 w-4 mr-2" /> System Settings
                 </Button>
               </div>
             </Card>
           </CardContent>
         </Card>
       </div>
+
+      {/* Verifications Section */}
+      <Card className={darkMode ? "bg-[#232326] border-gray-700" : ""}>
+        <CardHeader>
+          <CardTitle>Employee Verifications</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-4 mb-4">
+            <Select
+              defaultValue={selectedVerificationEmp}
+              onValueChange={setSelectedVerificationEmp}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select an employee" />
+              </SelectTrigger>
+              <SelectContent>
+                {mockEmployees.map((emp) => (
+                  <SelectItem key={emp.id} value={emp.id}>
+                    {emp.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Only show verifications if an employee is selected */}
+          {selectedVerificationEmp ? (
+            <div className="space-y-2">
+              {mockVerifications
+                .filter((v) => v.employeeId === selectedVerificationEmp)
+                .map((v) => (
+                  <div
+                    key={v.id}
+                    className="flex justify-between items-center p-3 border rounded-lg"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span>{v.file}</span>
+                      {v.status === "approved" ? (
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <Clock className="h-4 w-4 text-yellow-600" />
+                      )}
+                    </div>
+                    <Badge
+                      variant={
+                        v.status === "approved" ? "secondary" : "outline"
+                      }
+                    >
+                      {v.status}
+                    </Badge>
+                  </div>
+                ))}
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              Select an employee to view their verifications.
+            </p>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

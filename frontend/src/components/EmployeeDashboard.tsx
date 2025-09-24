@@ -95,6 +95,23 @@ export function EmployeeDashboard() {
   const [showGaps, setShowGaps] = useState(false);
   const [isComputing, setIsComputing] = useState(false);
 
+ const [activeAction, setActiveAction] = useState<{
+  milestoneId: number;
+  type: "request" | "upload";
+} | null>(null);
+const [showSuccess, setShowSuccess] = useState(false);
+
+const handleAction = () => {
+ 
+  setShowSuccess(true);
+
+  setTimeout(() => {
+    setActiveAction(null);
+    setShowSuccess(false);
+  }, 2000);
+};
+
+
   const getMilestoneIcon = (type: string) => {
     switch (type) {
       case 'training': return <BookOpen className="h-4 w-4" />;
@@ -480,15 +497,67 @@ Grid stability, maintenance standards</p>
       </div>
     </div>
 
-    {/* Action Buttons */}
-    <div className="border-t pt-3 space-y-2">
-      <Button size="sm" variant="outline" className="w-full text-xs">
-        Request Change
-      </Button>
-      <Button size="sm" variant="default" className="w-full text-xs">
-        Upload Verification
-      </Button>
-    </div>
+  {/* Action Buttons */}
+<div className="border-t pt-3 space-y-2">
+  <Button
+    size="sm"
+    variant="outline"
+    className="w-full text-xs"
+    onClick={() => setActiveAction({ milestoneId: index, type: "request" })}
+  >
+    Request Change
+  </Button>
+  <Button
+    size="sm"
+    variant="default"
+    className="w-full text-xs"
+    onClick={() => setActiveAction({ milestoneId: index, type: "upload" })}
+  >
+    Upload Verification
+  </Button>
+</div>
+
+{/* Inline Expanded Section */}
+{activeAction?.milestoneId === index && (
+  <div className="mt-3 p-3 border rounded-lg bg-gray-50 space-y-3">
+    {activeAction.type === "request" ? (
+      <>
+        <h4 className="font-semibold text-sm">
+          Request Change for {milestone.title}
+        </h4>
+        <textarea
+          placeholder="Explain your requested change..."
+          className="w-full border p-2 rounded h-24"
+        />
+        <Button size="sm" onClick={handleAction}>
+          Submit Request
+        </Button>
+      </>
+    ) : (
+      <>
+        <h4 className="font-semibold text-sm">
+          Upload Verification for {milestone.title}
+        </h4>
+        <input type="file" className="w-full border p-2 rounded" />
+        <Button size="sm" onClick={handleAction}>
+          Upload
+        </Button>
+      </>
+    )}
+
+    {/* Success message */}
+    {showSuccess && (
+      <p className="text-green-600 font-medium text-sm mt-2">
+        {activeAction.type === "request"
+          ? "Request submitted successfully!"
+          : "Upload completed successfully!"}
+      </p>
+    )}
+  </div>
+)}
+
+
+
   </div>
 </HoverCardContent>
                   </HoverCard>

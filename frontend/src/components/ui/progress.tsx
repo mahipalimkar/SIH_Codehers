@@ -7,22 +7,29 @@ import { cn } from "./utils";
 
 function Progress({
   className,
-  value,
+  value = 0,  // Default value is 0 if undefined
   ...props
 }: React.ComponentProps<typeof ProgressPrimitive.Root>) {
+  // Ensure the value is clamped between 0 and 100 for safe width calculation
+  const progressValue = Math.max(0, Math.min(value, 100));
+
   return (
     <ProgressPrimitive.Root
       data-slot="progress"
       className={cn(
-        "bg-primary/20 relative h-2 w-full overflow-hidden rounded-full",
+        "bg-blue-100 relative h-2 w-full overflow-hidden rounded-full", // Light blue background
         className,
       )}
       {...props}
     >
       <ProgressPrimitive.Indicator
         data-slot="progress-indicator"
-        className="bg-primary h-full w-full flex-1 transition-all"
-        style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
+        className="h-full transition-all"
+        style={{
+          backgroundColor: "#88a6c7ff", // Light blue indicator color
+          width: `${progressValue}%`, // Set width based on progress value
+          minWidth: "4px", // Ensures the indicator is always visible, even at 0%
+        }}
       />
     </ProgressPrimitive.Root>
   );
